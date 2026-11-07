@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>삿포로 맛집투어 12.3–12.6</title>
+<title>삿포로 여행 동선 12.3–12.6</title>
 <meta name="description" content="삿포로·오타루 3박 4일 맛집 동선 지도 (2026.12.3–12.6)">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kkhgold.github.io/sapporo-food-tour/">
-<meta property="og:title" content="삿포로 맛집투어 12.3–12.6">
-<meta property="og:description" content="라멘·징기스칸·수프카레·오타루 초밥까지, 날짜별 이동 동선을 지도로 보기">
-<meta property="og:image" content="https://kkhgold.github.io/sapporo-food-tour/og.png">
+<meta property="og:title" content="삿포로 여행 동선 12.3–12.6">
+<meta property="og:description" content="스스키노 · 노보리베츠 일일투어 · 오타루 · 크리스마스 마켓, 날짜별 이동 동선을 지도로 보기">
+<meta property="og:image" content="https://kkhgold.github.io/sapporo-food-tour/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -101,11 +101,11 @@ h1{font:400 28px/1.15 var(--display);margin:0;letter-spacing:.01em;text-wrap:bal
 </head>
 <body>
 <div class="app">
-  <div id="map" role="region" aria-label="삿포로 맛집투어 지도"></div>
+  <div id="map" role="region" aria-label="삿포로 여행 동선 지도"></div>
   <aside>
     <header>
-      <h1>삿포로 맛집투어</h1>
-      <div class="sub">2026년 12월 3일(목) – 6일(일) · 삿포로 & 오타루</div>
+      <h1>삿포로 여행 동선</h1>
+      <div class="sub">2026년 12월 3일(목) – 6일(일) · <a href="trip.html" style="color:var(--accent)">여행 준비 페이지 →</a></div>
       <div class="tabs" role="tablist" id="tabs"></div>
       <div class="controls">
         <button class="btn primary" id="play">▶ 동선 재생</button>
@@ -124,7 +124,7 @@ h1{font:400 28px/1.15 var(--display);margin:0;letter-spacing:.01em;text-wrap:bal
         <span><i style="border-color:var(--walk);border-top-style:dashed"></i>도보</span>
         <span><i style="border-color:var(--subway)"></i>지하철</span>
         <span><i style="border-color:var(--jr)"></i>JR</span>
-        <span><i style="border-color:var(--car)"></i>버스·택시</span>
+        <span><i style="border-color:var(--car)"></i>투어버스</span>
       </div>
     </header>
     <div class="list" id="list"></div>
@@ -138,67 +138,65 @@ const MODE = {
   walk:  {label:"도보",  icon:"🚶", color:"--walk",  dash:"2 8", kmh:4.5},
   subway:{label:"지하철",icon:"🚇", color:"--subway",dash:null,  kmh:30},
   jr:    {label:"JR",    icon:"🚆", color:"--jr",    dash:null,  kmh:60},
-  bus:   {label:"버스",  icon:"🚌", color:"--car",   dash:"8 6", kmh:18},
+  bus:   {label:"투어버스",icon:"🚌", color:"--car",   dash:"8 6", kmh:55},
   taxi:  {label:"택시",  icon:"🚕", color:"--car",   dash:"8 6", kmh:22},
 };
 const JR_AIRPORT = [[43.0390,141.4740],[42.9860,141.5630],[42.8820,141.5780],[42.8280,141.6520]];
 const JR_OTARU   = [[43.0790,141.2900],[43.1230,141.2400],[43.1550,141.1300],[43.1640,141.0600],[43.1880,141.0200]];
 
+const HOTEL = [43.0627,141.3537];
+const TOUR_1 = [[42.83,141.62],[42.66,141.55],[42.56,141.35]];      // 타키노 → 노보리베츠 (치토세·도마코마이 경유)
+const TOUR_2 = [[42.55,141.00]];                                      // 노보리베츠 → 사이로 전망대
+const TOUR_3 = [[42.70,140.90],[42.78,140.95]];                       // 사이로 → 나카야마 고개
+const TOUR_4 = [[42.93,141.20],[43.00,141.30]];                       // 나카야마 고개 → 삿포로
+
 const DAYS = [
- { date:"12/3", dow:"목", title:"도착 · 오도리 크리스마스 마켓",
+ { date:"12/3", dow:"목", title:"도착 · 스스키노 저녁과 쇼핑",
    stops:[
-    {n:"신치토세 공항", ll:[42.7875,141.6812], t:"13:10", d:"착륙 · 입국심사 후 JR 쾌속 에어포트 (약 37분)"},
-    {n:"삿포로역", ll:[43.0686,141.3508], t:"15:10", d:"", by:"jr", via:JR_AIRPORT.slice().reverse()},
-    {n:"삿포로 라멘공화국", ll:[43.0677,141.3530], t:"15:20", d:"ESTA 10층. 홋카이도 각지 라멘 8곳 모음. 늦은 점심으로 미소라멘", by:"walk", food:true},
-    {n:"숙소 체크인", ll:[43.0627,141.3537], t:"16:20", d:"오도리역 지하상가와 연결. 체크인 15시부터", by:"walk"},
-    {n:"오도리공원 · 뮌헨 크리스마스 마켓", ll:[43.0602,141.3530], t:"17:00", d:"화이트 일루미네이션과 함께. 핫와인(글뤼바인)과 소시지", by:"walk", food:true},
-    {n:"삿포로 TV타워", ll:[43.0611,141.3564], t:"18:00", d:"전망대에서 일루미네이션 야경", by:"walk"},
-    {n:"타누키코지 상점가", ll:[43.0575,141.3535], t:"18:40", d:"지붕 덮인 1km 아케이드. 기념품·드럭스토어", by:"walk"},
-    {n:"징기스칸 다루마 본점", ll:[43.0549,141.3530], t:"19:30", d:"양고기 징기스칸 원조급 노포. 줄 서는 곳", by:"walk", food:true},
-    {n:"시메 파르페 (스스키노)", ll:[43.0562,141.3548], t:"21:30", d:"삿포로식 '마무리 파르페' 문화 체험", by:"walk", food:true},
+    {n:"신치토세 공항", ll:[42.7875,141.6812], t:"13:10", d:"수하물 → 이온뱅크 ATM(트래블월렛) → 국내선 3층 라멘거리 점심 · 2층 포테리코, 키노토야, 스노우 골드 쿠키", food:true},
+    {n:"삿포로역", ll:[43.0686,141.3508], t:"15:00", d:"국내선 B1 JR 쾌속 에어포트 자유석 (35–40분 · 1,230엔)", by:"jr", via:JR_AIRPORT.slice().reverse()},
+    {n:"삿포로 그랜드 호텔", ll:HOTEL, t:"16:00", d:"짐 정리 및 휴식 (지하상가 연결, 8번 출구 뒤쪽 동관 B1)", by:"walk"},
+    {n:"스스키노", ll:[43.0553,141.3530], t:"17:00", d:"스스키노 방향 이동", by:"walk"},
+    {n:"저녁식사", ll:[43.0535,141.3542], t:"19:00", d:"스프카레 / 징기스칸 / 스미레 미소라멘 중 선택", by:"walk", food:true},
+    {n:"쇼핑 (타누키코지)", ll:[43.0572,141.3540], t:"20:00", d:"스탠다드 프로덕트 · 돈키호테 · 동구리빵(다음날 아침용) · 세이코마트", by:"walk"},
+    {n:"숙소 복귀", ll:HOTEL, t:"21:30", d:"", by:"walk"},
    ]},
- { date:"12/4", dow:"금", title:"니조시장 · 마루야마 · 맥주원",
+ { date:"12/4", dow:"금", title:"일일투어 · 노보리베츠 · 도야호수",
    stops:[
-    {n:"숙소 출발", ll:[43.0627,141.3537], t:"08:00", d:"아침 일찍 출발"},
-    {n:"니조시장", ll:[43.0583,141.3586], t:"08:20", d:"카이센동(해산물덮밥) 아침. 성게·연어알", by:"walk", food:true},
-    {n:"오도리역", ll:[43.0609,141.3545], t:"09:30", d:"도자이선 탑승", by:"walk"},
-    {n:"마루야마코엔역", ll:[43.0548,141.3196], t:"09:45", d:"", by:"subway"},
-    {n:"홋카이도 신궁", ll:[43.0544,141.3074], t:"10:00", d:"눈 덮인 신궁 산책", by:"walk"},
-    {n:"마루야마 숲속 카페", ll:[43.0571,141.3138], t:"11:00", d:"오래된 목조 민가를 고친 핸드드립 카페", by:"walk", food:true},
-    {n:"마루야마코엔역", ll:[43.0548,141.3196], t:"12:00", d:"", by:"walk"},
-    {n:"오도리역", ll:[43.0609,141.3545], t:"12:15", d:"", by:"subway"},
-    {n:"수프카레 가라쿠", ll:[43.0580,141.3552], t:"12:40", d:"삿포로 수프카레 대표 맛집. 매운맛 단계 선택", by:"walk", food:true},
-    {n:"삿포로 맥주박물관 · 비어가든", ll:[43.0714,141.3688], t:"16:30", d:"박물관 시음 후 저녁은 생맥주 + 징기스칸 무한리필", by:"bus", food:true},
-    {n:"라멘 신겐", ll:[43.0532,141.3460], t:"21:00", d:"진한 미소라멘. 밤늦게까지 영업해서 2차로 좋음", by:"taxi", food:true},
+    {n:"숙소 출발", ll:HOTEL, t:"07:00", d:"06:00 기상 · 아침식사 찾기"},
+    {n:"삿포로역 투어 미팅", ll:[43.0680,141.3500], t:"08:20", d:"와쿠와쿠 일일투어 · 08:30 미팅 후 출발", by:"walk"},
+    {n:"마코마나이 타키노 영원", ll:[42.9245,141.3485], t:"09:40", d:"두대불전 · 모아이상 · 스톤헨지 (입장료 준비)", by:"bus"},
+    {n:"노보리베츠 지옥계곡", ll:[42.4970,141.1490], t:"11:40", d:"지옥계곡 · 당일온천 · 간단한 점심 (온천·점심 비용 준비)", by:"bus", via:TOUR_1, food:true},
+    {n:"사이로 전망대", ll:[42.6100,140.8400], t:"15:30", d:"도야호수 구경 · 간식 사기", by:"bus", via:TOUR_2},
+    {n:"요테이산 (나카야마 고개)", ll:[42.8535,141.0985], t:"16:40", d:"요테이산 구경 · 아게이모 먹기", by:"bus", via:TOUR_3, food:true},
+    {n:"삿포로역 도착", ll:[43.0680,141.3500], t:"18:30", d:"19:00 저녁식사", by:"bus", via:TOUR_4, food:true},
+    {n:"칼디", ll:[43.0672,141.3518], t:"20:00", d:"칼디 털기", by:"walk"},
+    {n:"숙소 복귀", ll:HOTEL, t:"21:00", d:"", by:"walk"},
    ]},
- { date:"12/5", dow:"토", title:"오타루 당일치기",
+ { date:"12/5", dow:"토", title:"오타루 · 크리스마스 마켓 · T38 야경",
    stops:[
-    {n:"숙소 출발", ll:[43.0627,141.3537], t:"08:40", d:""},
-    {n:"삿포로역", ll:[43.0686,141.3508], t:"09:00", d:"JR 하코다테본선 쾌속 (약 35분). 오른쪽 창가에서 바다 보기", by:"walk"},
-    {n:"오타루역", ll:[43.1977,140.9940], t:"09:40", d:"", by:"jr"},
-    {n:"오타루 운하", ll:[43.1995,140.9950], t:"10:00", d:"눈 내린 운하와 석조 창고", by:"walk"},
-    {n:"스시야도리 초밥", ll:[43.1937,140.9998], t:"11:30", d:"오타루 초밥 골목. 런치 오마카세", by:"walk", food:true},
-    {n:"사카이마치 거리", ll:[43.1930,141.0020], t:"13:00", d:"유리공방·오르골당·디저트 가게 거리", by:"walk"},
-    {n:"르타오 본점", ll:[43.1918,141.0040], t:"14:30", d:"더블 프로마주 치즈케이크", by:"walk", food:true},
-    {n:"미나미오타루역", ll:[43.1897,141.0017], t:"15:30", d:"", by:"walk"},
-    {n:"삿포로역", ll:[43.0686,141.3508], t:"16:15", d:"", by:"jr", via:JR_OTARU.slice().reverse()},
-    {n:"게 요리 전문점 (삿포로역 앞)", ll:[43.0663,141.3517], t:"18:30", d:"털게·대게 코스로 마지막 밤 만찬", by:"walk", food:true},
+    {n:"숙소", ll:HOTEL, t:"07:00", d:"아침식사 (숙소)", food:true},
+    {n:"삿포로역", ll:[43.0686,141.3508], t:"08:30", d:"JR 09:10 차! 미나미오타루역에서 내리기", by:"walk"},
+    {n:"미나미오타루역", ll:[43.1897,141.0017], t:"09:40", d:"", by:"jr"},
+    {n:"르타오 본점", ll:[43.1918,141.0040], t:"09:50", d:"케이크·커피, 홍차 사기 · 르타오 다른 집들 구경", by:"walk", food:true},
+    {n:"오르골당", ll:[43.1912,141.0050], t:"10:40", d:"오르골 사기", by:"walk"},
+    {n:"이카타로혼포", ll:[43.1930,141.0018], t:"11:10", d:"구운 오징어 먹기", by:"walk", food:true},
+    {n:"점심식사", ll:[43.1945,141.0000], t:"11:30", d:"텐동(텐우니 예약) / 초밥 / 카이센동 / 라멘", by:"walk", food:true},
+    {n:"오타루역", ll:[43.1977,140.9940], t:"13:30", d:"삿포로행 12:53 · 13:17 · 13:53", by:"walk"},
+    {n:"삿포로역", ll:[43.0686,141.3508], t:"14:20", d:"15:00 일정 미정", by:"jr"},
+    {n:"오도리공원 크리스마스 마켓", ll:[43.0602,141.3530], t:"18:00", d:"18:00 저녁식사 · 19:00 크리스마스 마켓, 일루미네이션", by:"walk", food:true},
+    {n:"JR타워 T38 전망대", ll:[43.0683,141.3496], t:"20:00", d:"야경 · 티켓 미리 사기", by:"walk"},
+    {n:"숙소 복귀", ll:HOTEL, t:"21:00", d:"", by:"walk"},
    ]},
- { date:"12/6", dow:"일", title:"장외시장 아침 · 귀국",
+ { date:"12/6", dow:"일", title:"체크아웃 · 귀국",
    stops:[
-    {n:"숙소 출발", ll:[43.0627,141.3537], t:"07:30", d:"짐은 방에 두고 아침 먹으러"},
-    {n:"오도리역", ll:[43.0609,141.3545], t:"07:35", d:"도자이선 탑승", by:"walk"},
-    {n:"니주욘켄역", ll:[43.0656,141.3176], t:"07:45", d:"", by:"subway"},
-    {n:"삿포로 장외시장", ll:[43.0712,141.3205], t:"08:00", d:"중앙도매시장 옆 시장. 아침 해산물 정식", by:"walk", food:true},
-    {n:"니주욘켄역", ll:[43.0656,141.3176], t:"09:15", d:"", by:"walk"},
-    {n:"오도리역", ll:[43.0609,141.3545], t:"09:30", d:"", by:"subway"},
-    {n:"숙소 체크아웃", ll:[43.0627,141.3537], t:"09:40", d:"짐 정리 후 10:30 체크아웃 (체크아웃 11시)", by:"walk"},
-    {n:"삿포로역", ll:[43.0686,141.3508], t:"10:45", d:"11시 전후 JR 쾌속 에어포트 탑승", by:"walk"},
-    {n:"신치토세 공항", ll:[42.7875,141.6812], t:"11:40", d:"14:40 출발편. 체크인 후 공항 라멘·로이스 초콜릿으로 점심과 쇼핑", by:"jr", via:JR_AIRPORT, food:true},
+    {n:"숙소", ll:HOTEL, t:"08:00", d:"아침식사 · 10:00 체크아웃", food:true},
+    {n:"삿포로역", ll:[43.0686,141.3508], t:"10:10", d:"JR 공항철도 탑승", by:"walk"},
+    {n:"신치토세 공항", ll:[42.7875,141.6812], t:"11:00", d:"국내선 점심 · 12:30 국제선 수속, 면세 · 14:20 탑승 (14:40 – 18:10)", by:"jr", via:JR_AIRPORT, food:true},
    ]},
 ];
-// 오타루 갈 때 경유지 정리 (삿포로 → 오타루)
 DAYS[2].stops[2].via = JR_OTARU;
+DAYS[2].stops[8].via = JR_OTARU.slice().reverse();
 
 // ---------- 유틸 ----------
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -262,7 +260,7 @@ function render(i){
       d.style.borderLeftStyle=l.mode==="walk"?"dashed":"solid";
       d.innerHTML=`${m.icon} <b>${m.label}</b> ${l.km<1?Math.round(l.km*1000)+" m":l.km.toFixed(1)+" km"} · 약 ${mins}분`;list.appendChild(d);}
     const el=document.createElement("div"); el.className="stop"; el.tabIndex=0; el.id="stop"+k;
-    el.innerHTML=`<div class="num">${k+1}</div><div><h3>${s.n}${s.food?' <span style="color:var(--accent);font-weight:500;font-size:12px">맛집</span>':""}</h3>
+    el.innerHTML=`<div class="num">${k+1}</div><div><h3>${s.n}${s.food?' <span style="color:var(--accent);font-weight:500;font-size:12px">식사</span>':""}</h3>
       <div class="meta">${s.t}</div>${s.d?`<p>${s.d}</p>`:""}</div>`;
     const go=()=>{map.flyTo(s.ll,Math.max(map.getZoom(),15),{duration:.8});pins[k].openPopup();};
     el.onclick=go; el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}};
@@ -337,7 +335,7 @@ document.getElementById("play").onclick=play;
 document.getElementById("reset").onclick=()=>render(day);
 document.getElementById("share").onclick=async()=>{
   const b=document.getElementById("share"), url="https://kkhgold.github.io/sapporo-food-tour/";
-  const data={title:"삿포로 맛집투어 12.3–12.6",text:"삿포로 맛집투어 동선 지도 (12/3–12/6)",url};
+  const data={title:"삿포로 여행 동선 12.3–12.6",text:"삿포로 여행 동선 지도 (12/3–12/6)",url};
   if(navigator.share){try{await navigator.share(data);}catch(e){} return;}
   try{await navigator.clipboard.writeText(url);b.textContent="링크 복사됨 · 카톡에 붙여넣기";}
   catch(e){prompt("이 링크를 복사해서 카톡에 붙여넣으세요",url);}
