@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>삿포로 맛집투어 12.3–12.6</title>
+<meta name="description" content="삿포로·오타루 3박 4일 맛집 동선 지도 (2026.12.3–12.6)">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: 지도 전면 + 오른쪽 일정 패널 (모바일은 지도 위, 패널 아래) */
+:root{
+  --bg:#f3f6f9; --panel:#ffffff; --fg:#17202b; --muted:#5c6b7a; --line:#dbe3ea;
+  --accent:#c2410c;      /* 등불 주황: 선택/진행 */
+  --walk:#0f766e;        /* 도보 */
+  --subway:#2563eb;      /* 지하철 */
+  --jr:#15803d;          /* JR */
+  --car:#7c3aed;         /* 버스/택시 */
+  --display:"Do Hyeon","Noto Sans KR",system-ui,sans-serif;
+  --body:"Noto Sans KR",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0e141b; --panel:#151d26; --fg:#e6edf3; --muted:#93a3b3; --line:#26323f;
+  --accent:#fb923c; --walk:#2dd4bf; --subway:#60a5fa; --jr:#4ade80; --car:#a78bfa;
+  color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:14px/1.55 var(--body);
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.app{display:grid;grid-template-columns:1fr 380px;height:100%}
+#map{height:100%;min-height:300px;background:var(--bg)}
+aside{background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;min-width:0;overflow:hidden}
+header{padding:18px max(16px,env(safe-area-inset-right,0px)) 12px 20px;border-bottom:1px solid var(--line)}
+h1{font:400 28px/1.15 var(--display);margin:0;letter-spacing:.01em;text-wrap:balance}
+.sub{color:var(--muted);font-size:13px;margin-top:4px}
+.tabs{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.tab{flex:1 1 0;min-width:64px;border:1px solid var(--line);background:transparent;color:var(--fg);
+  border-radius:8px;padding:7px 4px;font:500 13px var(--body);cursor:pointer;line-height:1.25}
+.tab small{display:block;color:var(--muted);font-size:11px;font-weight:400}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab[aria-selected="true"] small{color:#fff;opacity:.85}
+.tab:focus-visible,.btn:focus-visible,.stop:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.controls{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:8px;padding:6px 12px;font:500 13px var(--body);cursor:pointer}
+.btn.primary{background:var(--fg);color:var(--panel);border-color:var(--fg)}
+.speed{margin-left:auto;display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px}
+.stats{display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--muted)}
+.stats b{font:500 15px var(--mono);color:var(--fg);display:block;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{display:inline-block;width:18px;height:0;border-top:3px solid}
+.list{overflow-y:auto;padding:8px max(16px,env(safe-area-inset-right,0px)) 24px 12px;flex:1}
+.stop{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:10px 8px;border-radius:10px;cursor:pointer;border:1px solid transparent}
+.stop:hover{background:var(--bg)}
+.stop.active{border-color:var(--accent);background:var(--bg)}
+.stop.done .num{background:var(--fg);color:var(--panel)}
+.num{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:500 12px var(--mono);
+  border:1.5px solid var(--fg);color:var(--fg);background:var(--panel)}
+.stop h3{margin:0;font-size:14.5px;font-weight:700}
+.stop .meta{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.stop p{margin:3px 0 0;font-size:13px;color:var(--muted)}
+.leg{margin:2px 0 2px 21px;padding:2px 0 2px 19px;border-left:2px dashed var(--line);font-size:12px;color:var(--muted)}
+.leg b{font-weight:500}
+.note{font-size:11.5px;color:var(--muted);padding:10px 8px 0;border-top:1px solid var(--line);margin-top:10px}
+/* map markers */
+.pin{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:600 12px var(--mono);
+  background:var(--panel);color:var(--fg);border:2px solid var(--fg);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.pin.on{background:var(--accent);border-color:#fff;color:#fff}
+.mover{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:18px;
+  background:#fff;border:3px solid var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.leaflet-popup-content{font:13px/1.5 var(--body)}
+.leaflet-popup-content b{font-size:14px}
+.leaflet-container{font-family:var(--body)}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr;grid-template-rows:52vh 1fr}
+  aside{border-left:0;border-top:1px solid var(--line)}
+  header{padding-left:max(16px,env(safe-area-inset-left,0px))}
+  .list{padding-left:max(16px,env(safe-area-inset-left,0px))}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="map" role="region" aria-label="삿포로 맛집투어 지도"></div>
+  <aside>
+    <header>
+      <h1>삿포로 맛집투어</h1>
+      <div class="sub">2026년 12월 3일(목) – 6일(일) · 삿포로 & 오타루</div>
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <div class="controls">
+        <button class="btn primary" id="play">▶ 동선 재생</button>
+        <button class="btn" id="reset">처음으로</button>
+        <label class="speed" for="speed">속도
+          <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+        </label>
+      </div>
+      <div class="stats">
+        <div><b id="sStops">–</b>방문지</div>
+        <div><b id="sWalk">–</b>도보 거리</div>
+        <div><b id="sWalkMin">–</b>도보 시간</div>
+      </div>
+      <div class="legend">
+        <span><i style="border-color:var(--walk);border-top-style:dashed"></i>도보</span>
+        <span><i style="border-color:var(--subway)"></i>지하철</span>
+        <span><i style="border-color:var(--jr)"></i>JR</span>
+        <span><i style="border-color:var(--car)"></i>버스·택시</span>
+      </div>
+    </header>
+    <div class="list" id="list"></div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// ---------- 데이터 (좌표는 근사값) ----------
+const MODE = {
+  walk:  {label:"도보",  icon:"🚶", color:"--walk",  dash:"2 8", kmh:4.5},
+  subway:{label:"지하철",icon:"🚇", color:"--subway",dash:null,  kmh:30},
+  jr:    {label:"JR",    icon:"🚆", color:"--jr",    dash:null,  kmh:60},
+  bus:   {label:"버스",  icon:"🚌", color:"--car",   dash:"8 6", kmh:18},
+  taxi:  {label:"택시",  icon:"🚕", color:"--car",   dash:"8 6", kmh:22},
+};
+const JR_AIRPORT = [[43.0390,141.4740],[42.9860,141.5630],[42.8820,141.5780],[42.8280,141.6520]];
+const JR_OTARU   = [[43.0790,141.2900],[43.1230,141.2400],[43.1550,141.1300],[43.1640,141.0600],[43.1880,141.0200]];
+
+const DAYS = [
+ { date:"12/3", dow:"목", title:"도착 · 오도리 크리스마스 마켓",
+   stops:[
+    {n:"신치토세 공항", ll:[42.7875,141.6812], t:"13:00", d:"도착 후 JR 쾌속 에어포트 탑승 (약 37분)"},
+    {n:"삿포로역", ll:[43.0686,141.3508], t:"14:00", d:"숙소 체크인·짐 맡기기", by:"jr", via:JR_AIRPORT.slice().reverse()},
+    {n:"삿포로 라멘공화국", ll:[43.0677,141.3530], t:"14:30", d:"ESTA 10층. 홋카이도 각지 라멘 8곳 모음. 늦은 점심으로 미소라멘", by:"walk", food:true},
+    {n:"오도리공원 · 뮌헨 크리스마스 마켓", ll:[43.0602,141.3530], t:"16:00", d:"화이트 일루미네이션과 함께. 핫와인(글뤼바인)과 소시지", by:"walk", food:true},
+    {n:"삿포로 TV타워", ll:[43.0611,141.3564], t:"17:00", d:"전망대에서 일루미네이션 야경", by:"walk"},
+    {n:"타누키코지 상점가", ll:[43.0575,141.3535], t:"18:00", d:"지붕 덮인 1km 아케이드. 기념품·드럭스토어", by:"walk"},
+    {n:"징기스칸 다루마 본점", ll:[43.0549,141.3530], t:"19:00", d:"양고기 징기스칸 원조급 노포. 줄 서는 곳이라 일찍 가기", by:"walk", food:true},
+    {n:"시메 파르페 (스스키노)", ll:[43.0562,141.3548], t:"21:00", d:"삿포로식 '마무리 파르페' 문화 체험", by:"walk", food:true},
+   ]},
+ { date:"12/4", dow:"금", title:"니조시장 · 마루야마 · 맥주원",
+   stops:[
+    {n:"스스키노 (숙소 출발)", ll:[43.0556,141.3536], t:"08:00", d:"아침 일찍 출발"},
+    {n:"니조시장", ll:[43.0583,141.3586], t:"08:20", d:"카이센동(해산물덮밥) 아침. 성게·연어알", by:"walk", food:true},
+    {n:"오도리역", ll:[43.0609,141.3545], t:"09:30", d:"도자이선 탑승", by:"walk"},
+    {n:"마루야마코엔역", ll:[43.0548,141.3196], t:"09:45", d:"", by:"subway"},
+    {n:"홋카이도 신궁", ll:[43.0544,141.3074], t:"10:00", d:"눈 덮인 신궁 산책", by:"walk"},
+    {n:"마루야마 숲속 카페", ll:[43.0571,141.3138], t:"11:00", d:"오래된 목조 민가를 고친 핸드드립 카페", by:"walk", food:true},
+    {n:"마루야마코엔역", ll:[43.0548,141.3196], t:"12:00", d:"", by:"walk"},
+    {n:"오도리역", ll:[43.0609,141.3545], t:"12:15", d:"", by:"subway"},
+    {n:"수프카레 가라쿠", ll:[43.0580,141.3552], t:"12:40", d:"삿포로 수프카레 대표 맛집. 매운맛 단계 선택", by:"walk", food:true},
+    {n:"삿포로 맥주박물관 · 비어가든", ll:[43.0714,141.3688], t:"16:30", d:"박물관 시음 후 저녁은 생맥주 + 징기스칸 무한리필", by:"bus", food:true},
+    {n:"라멘요코초 (스스키노)", ll:[43.0553,141.3534], t:"20:30", d:"좁은 골목 라멘집 거리에서 2차", by:"taxi", food:true},
+   ]},
+ { date:"12/5", dow:"토", title:"오타루 당일치기",
+   stops:[
+    {n:"삿포로역", ll:[43.0686,141.3508], t:"09:00", d:"JR 하코다테본선 쾌속 (약 35분). 오른쪽 창가에서 바다 보기"},
+    {n:"오타루역", ll:[43.1977,140.9940], t:"09:40", d:"", by:"jr"},
+    {n:"오타루 운하", ll:[43.1995,140.9950], t:"10:00", d:"눈 내린 운하와 석조 창고", by:"walk"},
+    {n:"스시야도리 초밥", ll:[43.1937,140.9998], t:"11:30", d:"오타루 초밥 골목. 런치 오마카세", by:"walk", food:true},
+    {n:"사카이마치 거리", ll:[43.1930,141.0020], t:"13:00", d:"유리공방·오르골당·디저트 가게 거리", by:"walk"},
+    {n:"르타오 본점", ll:[43.1918,141.0040], t:"14:30", d:"더블 프로마주 치즈케이크", by:"walk", food:true},
+    {n:"미나미오타루역", ll:[43.1897,141.0017], t:"15:30", d:"", by:"walk"},
+    {n:"삿포로역", ll:[43.0686,141.3508], t:"16:15", d:"", by:"jr", via:JR_OTARU.slice().reverse()},
+    {n:"게 요리 전문점 (삿포로역 앞)", ll:[43.0663,141.3517], t:"18:30", d:"털게·대게 코스로 마지막 밤 만찬", by:"walk", food:true},
+   ]},
+ { date:"12/6", dow:"일", title:"장외시장 아침 · 귀국",
+   stops:[
+    {n:"오도리역", ll:[43.0609,141.3545], t:"07:30", d:"도자이선 탑승"},
+    {n:"니주욘켄역", ll:[43.0656,141.3176], t:"07:45", d:"", by:"subway"},
+    {n:"삿포로 장외시장", ll:[43.0712,141.3205], t:"08:00", d:"중앙도매시장 옆 시장. 아침 해산물 정식", by:"walk", food:true},
+    {n:"니주욘켄역", ll:[43.0656,141.3176], t:"09:30", d:"", by:"walk"},
+    {n:"스스키노역", ll:[43.0553,141.3530], t:"10:00", d:"짐 찾기", by:"subway"},
+    {n:"라멘 신겐", ll:[43.0532,141.3460], t:"11:00", d:"진한 미소라멘. 오픈 직후 방문 추천", by:"walk", food:true},
+    {n:"스스키노역", ll:[43.0553,141.3530], t:"12:00", d:"난보쿠선 탑승", by:"walk"},
+    {n:"삿포로역", ll:[43.0686,141.3508], t:"12:10", d:"JR 쾌속 에어포트", by:"subway"},
+    {n:"신치토세 공항", ll:[42.7875,141.6812], t:"13:00", d:"홋카이도 라멘도장 · 로이스 초콜릿 공장에서 마지막 쇼핑", by:"jr", via:JR_AIRPORT, food:true},
+   ]},
+];
+// 오타루 갈 때 경유지 정리 (삿포로 → 오타루)
+DAYS[2].stops[1].via = JR_OTARU;
+
+// ---------- 유틸 ----------
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const R = 6371;
+function dist(a,b){const toR=x=>x*Math.PI/180;const dLa=toR(b[0]-a[0]),dLo=toR(b[1]-a[1]);
+  const h=Math.sin(dLa/2)**2+Math.cos(toR(a[0]))*Math.cos(toR(b[0]))*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
+function pathLen(p){let s=0;for(let i=1;i<p.length;i++)s+=dist(p[i-1],p[i]);return s;}
+// 삿포로는 바둑판 도로 → 도보는 ㄱ자 경로로
+function buildPath(a,b,s){
+  if(s.via) return [a,...s.via,b];
+  if(s.by==="walk"){const corner=[a[0],b[1]];return dist(a,corner)>0.03&&dist(corner,b)>0.03?[a,corner,b]:[a,b];}
+  return [a,b];
+}
+function at(p,cum,f){const L=cum[cum.length-1]*f;let i=1;while(i<cum.length-1&&cum[i]<L)i++;
+  const seg=cum[i]-cum[i-1]||1,t=(L-cum[i-1])/seg;return [p[i-1][0]+(p[i][0]-p[i-1][0])*t,p[i-1][1]+(p[i][1]-p[i-1][1])*t,i];}
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ---------- 지도 ----------
+const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+const map = L.map("map",{zoomControl:true}).setView([43.06,141.35],13);
+L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark?"dark_all":"rastertiles/voyager"}/{z}/{x}/{y}{r}.png`,{
+  maxZoom:19,subdomains:"abcd",
+  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+}).addTo(map);
+const layer = L.layerGroup().addTo(map);
+
+let day=0, legs=[], pins=[], mover=null, anim=null, playing=false, legIdx=0, legT=0;
+
+function prepDay(i){
+  const st=DAYS[i].stops; legs=[];
+  for(let k=1;k<st.length;k++){
+    const s=st[k], p=buildPath(st[k-1].ll,s.ll,s), cum=[0];
+    for(let j=1;j<p.length;j++)cum.push(cum[j-1]+dist(p[j-1],p[j]));
+    legs.push({from:k-1,to:k,mode:s.by,path:p,cum,km:cum[cum.length-1]});
+  }
+}
+function pinIcon(n,on){return L.divIcon({className:"",html:`<div class="pin${on?" on":""}">${n}</div>`,iconSize:[26,26],iconAnchor:[13,13]});}
+function moverIcon(m){return L.divIcon({className:"",html:`<div class="mover">${MODE[m].icon}</div>`,iconSize:[34,34],iconAnchor:[17,17]});}
+
+function render(i){
+  stop(); day=i; layer.clearLayers(); prepDay(i);
+  document.querySelectorAll(".tab").forEach((t,k)=>t.setAttribute("aria-selected",k===i));
+  const st=DAYS[i].stops;
+  // 흐린 전체 경로 미리보기
+  legs.forEach(l=>L.polyline(l.path,{color:css(MODE[l.mode].color),weight:3,opacity:.22,dashArray:MODE[l.mode].dash}).addTo(layer));
+  pins=st.map((s,k)=>L.marker(s.ll,{icon:pinIcon(k+1,false),zIndexOffset:100})
+    .bindPopup(`<b>${k+1}. ${s.n}</b><br>${s.t}${s.d?" · "+s.d:""}`).addTo(layer));
+  map.fitBounds(L.latLngBounds(st.map(s=>s.ll)).pad(.12));
+  // 통계
+  const walk=legs.filter(l=>l.mode==="walk").reduce((a,l)=>a+l.km,0);
+  document.getElementById("sStops").textContent=st.length+"곳";
+  document.getElementById("sWalk").textContent=walk.toFixed(1)+" km";
+  document.getElementById("sWalkMin").textContent="약 "+Math.round(walk/4.5*60)+"분";
+  // 리스트
+  const list=document.getElementById("list"); list.innerHTML="";
+  const h=document.createElement("div"); h.className="sub"; h.style.padding="6px 8px 4px";
+  h.innerHTML=`<b style="color:var(--fg)">${DAYS[i].date} (${DAYS[i].dow})</b> · ${DAYS[i].title}`; list.appendChild(h);
+  st.forEach((s,k)=>{
+    if(k>0){const l=legs[k-1],m=MODE[l.mode];const mins=Math.max(1,Math.round(l.km/m.kmh*60));
+      const d=document.createElement("div");d.className="leg";d.style.borderLeftColor=css(m.color);
+      d.style.borderLeftStyle=l.mode==="walk"?"dashed":"solid";
+      d.innerHTML=`${m.icon} <b>${m.label}</b> ${l.km<1?Math.round(l.km*1000)+" m":l.km.toFixed(1)+" km"} · 약 ${mins}분`;list.appendChild(d);}
+    const el=document.createElement("div"); el.className="stop"; el.tabIndex=0; el.id="stop"+k;
+    el.innerHTML=`<div class="num">${k+1}</div><div><h3>${s.n}${s.food?' <span style="color:var(--accent);font-weight:500;font-size:12px">맛집</span>':""}</h3>
+      <div class="meta">${s.t}</div>${s.d?`<p>${s.d}</p>`:""}</div>`;
+    const go=()=>{map.flyTo(s.ll,Math.max(map.getZoom(),15),{duration:.8});pins[k].openPopup();};
+    el.onclick=go; el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}};
+    list.appendChild(el);
+  });
+  const note=document.createElement("div");note.className="note";
+  note.textContent="좌표와 소요시간은 근사값이에요. 가게 영업일·시간은 방문 전에 꼭 확인하세요.";
+  list.appendChild(note);
+  mark(0);
+}
+function mark(k,done){
+  document.querySelectorAll(".stop").forEach((e,j)=>{e.classList.toggle("active",j===k);e.classList.toggle("done",j<k);});
+  pins.forEach((p,j)=>p.setIcon(pinIcon(j+1,j===k)));
+  const el=document.getElementById("stop"+k); if(el) el.scrollIntoView({block:"nearest",behavior:reduce?"auto":"smooth"});
+}
+
+// ---------- 애니메이션 ----------
+let drawn=null;
+function legDuration(l){ // 화면에서 보기 좋은 시간 (ms)
+  const base = l.mode==="jr"?2600 : l.mode==="walk"?Math.min(2400,700+l.km*2200) : 1600;
+  return base / +document.getElementById("speed").value;
+}
+function startLeg(){
+  const l=legs[legIdx];
+  drawn=L.polyline([l.path[0]],{color:css(MODE[l.mode].color),weight:l.mode==="walk"?4:5,opacity:.95,dashArray:MODE[l.mode].dash,lineCap:"round"}).addTo(layer);
+  if(!mover) mover=L.marker(l.path[0],{icon:moverIcon(l.mode),zIndexOffset:1000}).addTo(layer);
+  else mover.setIcon(moverIcon(l.mode));
+  if(l.mode==="jr"||l.km>2) map.flyToBounds(L.latLngBounds(l.path).pad(.25),{duration:.6});
+  else if(!map.getBounds().pad(-.15).contains(l.path[l.path.length-1])) map.panTo(l.path[l.path.length-1]);
+}
+function frame(ts){
+  if(!playing) return;
+  const l=legs[legIdx];
+  if(frame.last==null) frame.last=ts;
+  legT += (ts-frame.last)/legDuration(l); frame.last=ts;
+  const f=Math.min(1,legT), pt=at(l.path,l.cum,f);
+  drawn.setLatLngs([...l.path.slice(0,pt[2]),[pt[0],pt[1]]]);
+  mover.setLatLng([pt[0],pt[1]]);
+  if(f>=1){
+    drawn.setLatLngs(l.path); mark(l.to);
+    legIdx++; legT=0;
+    if(legIdx>=legs.length){ finish(); return; }
+    frame.last=null; playing=false;
+    setTimeout(()=>{ if(anim==="run"){playing=true;startLeg();requestAnimationFrame(frame);} }, 650/ +document.getElementById("speed").value);
+    return;
+  }
+  requestAnimationFrame(frame);
+}
+function play(){
+  const btn=document.getElementById("play");
+  if(anim==="run"){ anim="pause"; playing=false; btn.textContent="▶ 계속"; return; }
+  if(legIdx>=legs.length || anim==null){ render(day); legIdx=0; legT=0; }
+  btn.textContent="❚❚ 일시정지";
+  if(reduce){ // 애니메이션 최소화: 한 번에 그리기
+    legs.forEach(l=>L.polyline(l.path,{color:css(MODE[l.mode].color),weight:4,dashArray:MODE[l.mode].dash}).addTo(layer));
+    legIdx=legs.length; mark(DAYS[day].stops.length-1); finish(); return;
+  }
+  anim="run"; playing=true; frame.last=null;
+  if(legT===0) startLeg();
+  requestAnimationFrame(frame);
+}
+function finish(){ anim="done"; playing=false; document.getElementById("play").textContent="↻ 다시 재생";
+  document.querySelectorAll(".stop").forEach(e=>e.classList.add("done")); }
+function stop(){ anim=null; playing=false; mover=null; legIdx=0; legT=0; const b=document.getElementById("play"); if(b) b.textContent="▶ 동선 재생"; }
+
+// ---------- UI ----------
+const tabs=document.getElementById("tabs");
+DAYS.forEach((d,i)=>{const b=document.createElement("button");b.className="tab";b.setAttribute("role","tab");
+  b.innerHTML=`Day ${i+1}<small>${d.date} ${d.dow}</small>`;b.onclick=()=>{render(i);setTimeout(play,500);};tabs.appendChild(b);});
+document.getElementById("play").onclick=play;
+document.getElementById("reset").onclick=()=>render(day);
+let initial=0; const h=location.hash.match(/^#day([1-4])$/); if(h) initial=+h[1]-1;
+render(initial);
+setTimeout(play,900);
+</script>
+</body>
+</html>
