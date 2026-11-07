@@ -280,6 +280,7 @@ function startLeg(){
   if(!mover) mover=L.marker(l.path[0],{icon:moverIcon(l.mode),zIndexOffset:1000}).addTo(layer);
   else mover.setIcon(moverIcon(l.mode));
   if(l.mode==="jr"||l.km>2) map.flyToBounds(L.latLngBounds(l.path).pad(.25),{duration:.6});
+  else if(map.getZoom()<14) map.flyToBounds(L.latLngBounds(l.path).pad(1.2),{maxZoom:16,duration:.6});
   else if(!map.getBounds().pad(-.15).contains(l.path[l.path.length-1])) map.panTo(l.path[l.path.length-1]);
 }
 function frame(ts){
