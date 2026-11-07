@@ -76,9 +76,16 @@ h1{font:400 28px/1.15 var(--display);margin:0;letter-spacing:.01em;text-wrap:bal
 .leaflet-popup-content{font:13px/1.5 var(--body)}
 .leaflet-popup-content b{font-size:14px}
 .leaflet-container{font-family:var(--body)}
+.dark-tiles{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
 @media (max-width:820px){
-  .app{grid-template-columns:1fr;grid-template-rows:52vh 1fr}
-  aside{border-left:0;border-top:1px solid var(--line)}
+  /* 모바일: 페이지 전체가 스크롤, 지도는 위에 고정 */
+  html,body{height:auto}
+  .app{display:block;height:auto}
+  #map{position:sticky;top:0;height:46vh;z-index:5;border-bottom:1px solid var(--line)}
+  aside{border-left:0;overflow:visible}
+  .list{overflow:visible;flex:none}
+  .stop{scroll-margin-top:calc(46vh + 12px)}
+  h1{font-size:24px}
   header{padding-left:max(16px,env(safe-area-inset-left,0px))}
   .list{padding-left:max(16px,env(safe-area-inset-left,0px))}
 }
@@ -201,9 +208,9 @@ const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 // ---------- 지도 ----------
 const dark = matchMedia("(prefers-color-scheme: dark)").matches;
 const map = L.map("map",{zoomControl:true}).setView([43.06,141.35],13);
-L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark?"dark_all":"rastertiles/voyager"}/{z}/{x}/{y}{r}.png`,{
-  maxZoom:19,subdomains:"abcd",
-  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{
+  maxZoom:19, className: dark ? "dark-tiles" : "",
+  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 const layer = L.layerGroup().addTo(map);
 
