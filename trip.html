@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>삿포로 여행 준비 12.3–12.6</title>
+<meta name="description" content="삿포로 3박 4일 준비물 체크리스트, 항공, 숙박, 일정">
+<meta property="og:type" content="website">
+<meta property="og:title" content="삿포로 여행 준비 12.3–12.6">
+<meta property="og:description" content="전날 체크리스트 · 항공 · 숙박 · 일정 한눈에 보기">
+<meta property="og:image" content="https://kkhgold.github.io/sapporo-food-tour/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: 한 줄 세로 카드 흐름 (폰 우선), 넓은 화면은 항공 카드 2열 */
+:root{
+  --bg:#eef3f7; --card:#ffffff; --fg:#14202c; --muted:#5a6b7b; --line:#d6e0e8;
+  --accent:#c2410c; --ok:#15803d; --snow:#e3edf5; --ink:#1e3a5f;
+  --display:"Do Hyeon","Noto Sans KR",system-ui,sans-serif;
+  --body:"Noto Sans KR",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0d141b; --card:#151e28; --fg:#e6edf3; --muted:#93a3b3; --line:#283543;
+  --accent:#fb923c; --ok:#4ade80; --snow:#1b2733; --ink:#9cc3ea; color-scheme:dark;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 var(--body)}
+.wrap{max-width:720px;margin:0 auto;padding-block:28px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:22px}
+header h1{font:400 34px/1.1 var(--display);margin:0;text-wrap:balance}
+header .sub{color:var(--muted);margin-top:6px}
+.dday{display:inline-block;margin-top:10px;font:600 13px var(--mono);color:#fff;background:var(--accent);padding:3px 10px;border-radius:6px}
+.maplink{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--ink);color:var(--card);
+  text-decoration:none;padding:14px 18px;border-radius:12px;font-weight:700}
+.maplink span{font-weight:400;font-size:13px;opacity:.85}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 14px}
+h2{font:400 22px/1.2 var(--display);margin:0 0 12px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+h2 small{font:500 12px var(--mono);color:var(--muted)}
+.check{display:flex;flex-direction:column}
+.check label{display:flex;gap:12px;align-items:flex-start;padding:9px 2px;border-top:1px solid var(--line);cursor:pointer}
+.check label:first-child{border-top:0}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--ok);flex:none}
+.check input:checked+span{color:var(--muted);text-decoration:line-through}
+.check .time{font:600 13px var(--mono);color:var(--accent);margin-right:6px}
+.check .sm{display:block;font-size:12.5px;color:var(--muted)}
+.bar{height:6px;background:var(--snow);border-radius:3px;margin:-4px 0 10px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.flights{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.pass{border:1px dashed var(--line);border-radius:12px;padding:14px 16px;background:var(--snow);min-width:0}
+.pass .top{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted)}
+.route{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin:8px 0 4px}
+.route b{font:600 26px var(--mono);display:block;line-height:1.1}
+.route .r{text-align:right}
+.route small{font-size:12.5px;color:var(--muted)}
+.route .plane{color:var(--muted);font-size:18px}
+.tag{display:inline-block;font-size:12px;font-weight:700;color:var(--ok)}
+.meta{font-size:13px;color:var(--muted);margin-top:10px}
+dl{display:grid;grid-template-columns:88px 1fr;gap:6px 12px;margin:0;font-size:14px}
+dt{color:var(--muted)}
+dd{margin:0;min-width:0}
+.day{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+.day:first-of-type{border-top:0;margin-top:0;padding-top:0}
+.day h3{margin:0 0 4px;font-size:15px}
+.day h3 a{font-size:12px;font-weight:500;color:var(--accent);margin-left:6px}
+.day ul{margin:0;padding-left:0;list-style:none;font-size:14px}
+.day li{display:grid;grid-template-columns:52px 1fr;gap:6px;padding:2px 0}
+.day li b{font:500 13px var(--mono);color:var(--muted)}
+.foot{font-size:12px;color:var(--muted);text-align:center}
+a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>삿포로 여행 준비</h1>
+    <div class="sub">2026년 12월 3일(목) – 6일(일) · 3박 4일</div>
+    <span class="dday" id="dday">D-</span>
+  </header>
+
+  <a class="maplink" href="./">맛집 동선 지도 보기 <span>날짜별 이동 애니메이션 →</span></a>
+
+  <section>
+    <h2>‼️ 전날 체크 <small id="cnt">0/8</small></h2>
+    <div class="bar"><i id="bar"></i></div>
+    <div class="check" data-group="prep">
+      <label><input type="checkbox" id="p1"><span>사전 체크인, 자리 지정</span></label>
+      <label><input type="checkbox" id="p2"><span>인천공항 스마트 패스 탑승권 등록</span></label>
+      <label><input type="checkbox" id="p3"><span>비짓재팬 등록 - 김경화 동반자로</span></label>
+      <label><input type="checkbox" id="p4"><span>여행자 보험 가입</span></label>
+      <label><input type="checkbox" id="p5"><span>어항 환수</span></label>
+      <label><input type="checkbox" id="p6"><span>이심 구매</span></label>
+      <label><input type="checkbox" id="p7"><span>보조배터리, 충전기, 돼지코</span></label>
+      <label><input type="checkbox" id="p8"><span>신분증, 여권, 운전면허증, 국제운전면허증</span></label>
+    </div>
+  </section>
+
+  <section>
+    <h2>✈️ 항공 <small>트립닷컴</small></h2>
+    <div class="flights">
+      <div class="pass">
+        <div class="top"><span>12/3 (목) 가는 편</span><span class="tag">✓ 비상구 좌석</span></div>
+        <div class="route">
+          <div><b>10:20</b><small>인천 ICN</small></div>
+          <div class="plane">✈</div>
+          <div class="r"><b>13:10</b><small>신치토세 CTS</small></div>
+        </div>
+        <div class="meta">트리니티 항공</div>
+      </div>
+      <div class="pass">
+        <div class="top"><span>12/6 (일) 오는 편</span><span class="tag">✓ 예약 완료</span></div>
+        <div class="route">
+          <div><b>14:40</b><small>신치토세 CTS</small></div>
+          <div class="plane">✈</div>
+          <div class="r"><b>18:10</b><small>인천 ICN</small></div>
+        </div>
+        <div class="meta">트리니티 항공</div>
+      </div>
+    </div>
+    <div class="meta">왕복 1,097,200원 · 현대카드 3개월</div>
+  </section>
+
+  <section>
+    <h2>🏨 숙박 <small>✓ 예약 완료</small></h2>
+    <dl>
+      <dt>호텔</dt><dd><b>삿포로 그랜드 호텔</b></dd>
+      <dt>객실</dt><dd>트윈룸 · 금연 · 조식 불포함</dd>
+      <dt>시간</dt><dd>체크인 15:00 · 체크아웃 11:00</dd>
+      <dt>가는 길</dt><dd>지하상가 연결. 8번 출구 뒤쪽 동관 B1</dd>
+      <dt>결제</dt><dd>482,448원 · 아고다 · 국민카드 3개월</dd>
+    </dl>
+  </section>
+
+  <section>
+    <h2>🗓 12/3 (목) 출발 <small id="cnt2">0/3</small></h2>
+    <div class="check" data-group="dep">
+      <label><input type="checkbox" id="d1"><span><span class="time">06:00</span>동탄 출발</span></label>
+      <label><input type="checkbox" id="d2"><span><span class="time">07:00</span>주차대행 · 인천공항 제1터미널
+        <span class="sm">맥서브 엠파킹 단기주차 B1층 A구역 15 (예약 완료)</span></span></label>
+      <label><input type="checkbox" id="d3"><span><span class="time">07:20</span>트리니티 항공 체크인 카운터</span></label>
+    </div>
+  </section>
+
+  <section>
+    <h2>🍜 현지 일정</h2>
+    <div class="day">
+      <h3>12/3 (목) 도착 · 크리스마스 마켓 <a href="./#day1">지도</a></h3>
+      <ul>
+        <li><b>13:10</b>신치토세 공항 착륙 → JR 쾌속 에어포트</li>
+        <li><b>15:20</b>삿포로 라멘공화국 (늦은 점심)</li>
+        <li><b>16:20</b>호텔 체크인</li>
+        <li><b>17:00</b>오도리공원 뮌헨 크리스마스 마켓 · TV타워 야경</li>
+        <li><b>19:30</b>징기스칸 다루마 본점 → 시메 파르페</li>
+      </ul>
+    </div>
+    <div class="day">
+      <h3>12/4 (금) 니조시장 · 마루야마 · 맥주원 <a href="./#day2">지도</a></h3>
+      <ul>
+        <li><b>08:20</b>니조시장 카이센동 아침</li>
+        <li><b>10:00</b>홋카이도 신궁 → 마루야마 카페</li>
+        <li><b>12:40</b>수프카레 가라쿠</li>
+        <li><b>16:30</b>삿포로 맥주박물관 · 비어가든</li>
+        <li><b>21:00</b>라멘 신겐</li>
+      </ul>
+    </div>
+    <div class="day">
+      <h3>12/5 (토) 오타루 당일치기 <a href="./#day3">지도</a></h3>
+      <ul>
+        <li><b>09:00</b>삿포로역 → JR 오타루 (오른쪽 창가)</li>
+        <li><b>10:00</b>오타루 운하 → 스시야도리 초밥</li>
+        <li><b>13:00</b>사카이마치 거리 → 르타오 본점</li>
+        <li><b>18:30</b>삿포로역 앞 게 요리</li>
+      </ul>
+    </div>
+    <div class="day">
+      <h3>12/6 (일) 장외시장 · 귀국 <a href="./#day4">지도</a></h3>
+      <ul>
+        <li><b>08:00</b>삿포로 장외시장 해산물 아침</li>
+        <li><b>10:30</b>호텔 체크아웃</li>
+        <li><b>11:00</b>삿포로역 → JR 쾌속 에어포트</li>
+        <li><b>11:40</b>공항 도착 · 라멘, 로이스 쇼핑</li>
+        <li><b>14:40</b>신치토세 출발 → 18:10 인천</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="foot">체크 표시는 이 기기에만 저장돼요. 가게 영업시간은 방문 전에 확인하세요.</div>
+</div>
+<script>
+// D-day
+(function(){const t=new Date(2026,11,3),n=new Date();n.setHours(0,0,0,0);
+  const d=Math.round((t-n)/864e5);document.getElementById("dday").textContent=d>0?`D-${d}`:d===0?"D-DAY ✈":"여행 중 / 다녀옴";})();
+// 체크 상태 저장 (이 기기에만)
+const KEY="sapporo-trip-checks";
+let saved={};try{saved=JSON.parse(localStorage.getItem(KEY)||"{}");}catch(e){}
+const boxes=[...document.querySelectorAll(".check input")];
+function update(){
+  const g=s=>[...document.querySelectorAll(`[data-group="${s}"] input`)];
+  const p=g("prep"),d=g("dep"),pc=p.filter(b=>b.checked).length,dc=d.filter(b=>b.checked).length;
+  document.getElementById("cnt").textContent=`${pc}/${p.length}`;
+  document.getElementById("bar").style.width=(pc/p.length*100)+"%";
+  document.getElementById("cnt2").textContent=`${dc}/${d.length}`;
+}
+boxes.forEach(b=>{b.checked=!!saved[b.id];b.addEventListener("change",()=>{saved[b.id]=b.checked;
+  try{localStorage.setItem(KEY,JSON.stringify(saved));}catch(e){} update();});});
+update();
+</script>
+</body>
+</html>
