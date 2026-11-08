@@ -125,6 +125,7 @@ h1{font:400 28px/1.15 var(--display);margin:0;letter-spacing:.01em;text-wrap:bal
         <span><i style="border-color:var(--subway)"></i>지하철</span>
         <span><i style="border-color:var(--jr)"></i>JR</span>
         <span><i style="border-color:var(--car)"></i>투어버스</span>
+        <span><i style="border-color:var(--jr);border-top-style:dotted"></i>비행기</span>
       </div>
     </header>
     <div class="list" id="list"></div>
@@ -135,6 +136,8 @@ h1{font:400 28px/1.15 var(--display);margin:0;letter-spacing:.01em;text-wrap:bal
 <script>
 // ---------- 데이터 (좌표는 근사값) ----------
 const MODE = {
+  car:   {label:"자동차",icon:"🚗", color:"--walk",dash:null,  kmh:44},
+  plane: {label:"비행기",icon:"✈️", color:"--jr",dash:"2 10", kmh:600},
   walk:  {label:"도보",  icon:"🚶", color:"--walk",  dash:"2 8", kmh:4.5},
   subway:{label:"지하철",icon:"🚇", color:"--subway",dash:null,  kmh:30},
   jr:    {label:"JR",    icon:"🚆", color:"--jr",    dash:null,  kmh:60},
@@ -153,7 +156,9 @@ const TOUR_4 = [[42.93,141.20],[43.00,141.30]];                       // 나카�
 const DAYS = [
  { date:"12/3", dow:"목", title:"도착 · 스스키노 저녁과 쇼핑",
    stops:[
-    {n:"신치토세 공항", ll:[42.7875,141.6812], t:"13:10", d:"수하물 → 이온뱅크 ATM(트래블월렛) → 국내선 3층 라멘거리 점심 · 2층 포테리코, 키노토야, 스노우 골드 쿠키", food:true},
+    {n:"동탄 출발", ll:[37.2000,127.0730], t:"06:00", d:"인천공항까지 약 1시간"},
+    {n:"인천공항 제1터미널", ll:[37.4490,126.4510], t:"07:00", d:"주차대행 맥서브 엠파킹 (B1층 A구역15) · 07:20 체크인 · 10:20 출발", by:"car", via:[[37.3300,126.8400]]},
+    {n:"신치토세 공항", ll:[42.7875,141.6812], t:"13:10", by:"plane", via:[[38.8,131.0]], d:"수하물 → 이온뱅크 ATM(트래블월렛) → 국내선 3층 라멘거리 점심 · 2층 포테리코, 키노토야, 스노우 골드 쿠키", food:true},
     {n:"삿포로역", ll:[43.0686,141.3508], t:"15:00", d:"국내선 B1 JR 쾌속 에어포트 자유석 (35–40분 · 1,230엔)", by:"jr", via:JR_AIRPORT.slice().reverse()},
     {n:"삿포로 그랜드 호텔", ll:HOTEL, t:"16:00", d:"짐 정리 및 휴식 (지하상가 연결, 8번 출구 뒤쪽 동관 B1)", by:"walk"},
     {n:"스스키노", ll:[43.0553,141.3530], t:"17:00", d:"스스키노 방향 이동", by:"walk"},
@@ -193,6 +198,8 @@ const DAYS = [
     {n:"숙소", ll:HOTEL, t:"08:00", d:"아침식사 · 10:00 체크아웃", food:true},
     {n:"삿포로역", ll:[43.0686,141.3508], t:"10:10", d:"JR 공항철도 탑승", by:"walk"},
     {n:"신치토세 공항", ll:[42.7875,141.6812], t:"11:00", d:"국내선 점심 · 12:30 국제선 수속, 면세 · 14:20 탑승 (14:40 – 18:10)", by:"jr", via:JR_AIRPORT, food:true},
+    {n:"인천공항 제1터미널", ll:[37.4490,126.4510], t:"18:10", d:"입국 · 수하물 · 주차대행 차량 인수", by:"plane", via:[[38.8,131.0]]},
+    {n:"동탄 도착", ll:[37.2000,127.0730], t:"19:40", d:"집으로 복귀", by:"car", via:[[37.3300,126.8400]]},
    ]},
 ];
 DAYS[2].stops[2].via = JR_OTARU;
@@ -280,7 +287,7 @@ function mark(k,done){
 // ---------- 애니메이션 ----------
 let drawn=null;
 function legDuration(l){ // 화면에서 보기 좋은 시간 (ms)
-  const base = l.mode==="jr"?2600 : l.mode==="walk"?Math.min(2400,700+l.km*2200) : 1600;
+  const base = (l.mode==="jr"||l.mode==="plane")?2600 : l.mode==="walk"?Math.min(2400,700+l.km*2200) : 1600;
   return base / +document.getElementById("speed").value;
 }
 function startLeg(){
