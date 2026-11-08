@@ -78,6 +78,8 @@ h1{font:400 28px/1.15 var(--display);margin:0;letter-spacing:.01em;text-wrap:bal
 /* map markers */
 .pin{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:600 12px var(--mono);
   background:var(--panel);color:var(--fg);border:2px solid var(--fg);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.pick{color:var(--accent)!important;font-weight:600}.alt{font-size:12.5px!important}
+.altpin{width:22px;height:22px;border-radius:50%;background:var(--bg,#fff);border:1.5px solid var(--accent);display:grid;place-items:center;font-size:12px}
 .pin.on{background:var(--accent);border-color:#fff;color:#fff}
 .mover{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:18px;
   background:#fff;border:3px solid var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.35)}
@@ -158,11 +160,16 @@ const DAYS = [
    stops:[
     {n:"동탄 출발", ll:[37.2000,127.0730], t:"06:00", d:"인천공항까지 약 1시간"},
     {n:"인천공항 제1터미널", ll:[37.4490,126.4510], t:"07:00", d:"주차대행 맥서브 엠파킹 (B1층 A구역15) · 07:20 체크인 · 10:20 출발", by:"car", via:[[37.3300,126.8400]]},
-    {n:"신치토세 공항", ll:[42.7875,141.6812], t:"13:10", by:"plane", via:[[38.8,131.0]], d:"수하물 → 이온뱅크 ATM(트래블월렛) → 국내선 3층 라멘거리 점심 · 2층 포테리코, 키노토야, 스노우 골드 쿠키", food:true},
+    {n:"신치토세 공항", ll:[42.7875,141.6812], t:"13:10", by:"plane", via:[[38.8,131.0]], d:"수하물 → 이온뱅크 ATM(트래블월렛) → 국내선 3층 라멘도장 점심 · 2층 포테리코, 키노토야, 스노우 골드 쿠키", food:true,
+     pick:"🍜 추천: 이치겐(一幻) 신치토세점 — 새우 국물 라멘, 라멘도장 최고 인기 (줄 길면 옆 가게도 OK)"},
     {n:"삿포로역", ll:[43.0686,141.3508], t:"15:00", d:"국내선 B1 JR 쾌속 에어포트 자유석 (35–40분 · 1,230엔)", by:"jr", via:JR_AIRPORT.slice().reverse()},
     {n:"삿포로 그랜드 호텔", ll:HOTEL, t:"16:00", d:"짐 정리 및 휴식 (지하상가 연결, 8번 출구 뒤쪽 동관 B1)", by:"walk"},
     {n:"스스키노", ll:[43.0553,141.3530], t:"17:00", d:"스스키노 방향 이동", by:"walk"},
-    {n:"저녁식사", ll:[43.0535,141.3542], t:"19:00", d:"스프카레 / 징기스칸 / 스미레 미소라멘 중 선택", by:"walk", food:true},
+    {n:"징기스칸 다루마 본점", ll:[43.0548,141.3528], t:"19:00", d:"1954년 창업 스스키노 징기스칸 원조. 생 양고기를 돔 철판에 구워요. 예약 불가라 줄 서요 (1인 3,000–5,000엔)", by:"walk", food:true,
+     pick:"🐑 타베로그·구글 모두 삿포로 징기스칸 대표 맛집",
+     alt:[{n:"스아게+ (스프카레)", ll:[43.0563,141.3515], d:"타베로그 카레 백명점 6회 연속 선정. 19시쯤부터 줄"},
+          {n:"스미레 스스키노점 (미소라멘)", ll:[43.0522,141.3555], d:"삿포로 미소라멘의 대명사, 진한 라드 국물"},
+          {n:"케야키 스스키노 본점 (미소라멘)", ll:[43.0535,141.3553], d:"타베로그 라멘 백명점 2025, 작은 가게라 줄 있음"}]},
     {n:"쇼핑 (타누키코지)", ll:[43.0572,141.3540], t:"20:00", d:"스탠다드 프로덕트 · 돈키호테 · 동구리빵(다음날 아침용) · 세이코마트", by:"walk"},
     {n:"숙소 복귀", ll:HOTEL, t:"21:30", d:"", by:"walk"},
    ]},
@@ -174,7 +181,10 @@ const DAYS = [
     {n:"노보리베츠 지옥계곡", ll:[42.4970,141.1490], t:"11:40", d:"지옥계곡 · 당일온천 · 간단한 점심 (온천·점심 비용 준비)", by:"bus", via:TOUR_1, food:true},
     {n:"사이로 전망대", ll:[42.6100,140.8400], t:"15:30", d:"도야호수 구경 · 간식 사기", by:"bus", via:TOUR_2},
     {n:"요테이산 (나카야마 고개)", ll:[42.8535,141.0985], t:"16:40", d:"요테이산 구경 · 아게이모 먹기", by:"bus", via:TOUR_3, food:true},
-    {n:"삿포로역 도착", ll:[43.0680,141.3500], t:"18:30", d:"19:00 저녁식사", by:"bus", via:TOUR_4, food:true},
+    {n:"삿포로역 도착", ll:[43.0680,141.3500], t:"18:30", d:"투어 해산", by:"bus", via:TOUR_4},
+    {n:"회전초밥 네무로 하나마루 (JR타워 스텔라플레이스 6층)", ll:[43.0680,141.3515], t:"19:00", d:"구글 리뷰 수천 개의 삿포로역 회전초밥 대표 맛집. 앱/발권기로 대기 등록 후 칼디 구경하면 좋아요", by:"walk", food:true,
+     pick:"🍣 구글 인기 1순위 회전초밥 · 1인 2,500–4,000엔",
+     alt:[{n:"스프카레 GARAKU", ll:[43.0583,141.3557], d:"타베로그 상위권 스프카레, 오도리 근처 (지하철 1정거장)"}]},
     {n:"칼디", ll:[43.0672,141.3518], t:"20:00", d:"칼디 털기", by:"walk"},
     {n:"숙소 복귀", ll:HOTEL, t:"21:00", d:"", by:"walk"},
    ]},
@@ -186,18 +196,30 @@ const DAYS = [
     {n:"르타오 본점", ll:[43.1918,141.0040], t:"09:50", d:"케이크·커피, 홍차 사기 · 르타오 다른 집들 구경", by:"walk", food:true},
     {n:"오르골당", ll:[43.1912,141.0050], t:"10:40", d:"오르골 사기", by:"walk"},
     {n:"이카타로혼포", ll:[43.1930,141.0018], t:"11:10", d:"구운 오징어 먹기", by:"walk", food:true},
-    {n:"점심식사", ll:[43.1945,141.0000], t:"11:30", d:"텐동(텐우니 예약) / 초밥 / 카이센동 / 라멘", by:"walk", food:true},
+    {n:"점심식사", ll:[43.1945,141.0000], t:"11:30", d:"텐동(텐우니 예약) / 초밥 / 카이센동 / 라멘", by:"walk", food:true,
+     pick:"🍤 예약한 텐우니가 1순위. 대안은 아래 🍴 후보",
+     alt:[{n:"마사즈시 본점 (오타루 스시거리)", ll:[43.1950,140.9995], d:"오타루 스시거리 대표 노포, 오마카세 약 6,000엔"},
+          {n:"삼각시장 (카이센동)", ll:[43.1983,140.9937], d:"오타루역 바로 옆. 다키나미 식당 등 카이센동 가성비, 현금 준비"}]},
     {n:"오타루역", ll:[43.1977,140.9940], t:"13:30", d:"삿포로행 12:53 · 13:17 · 13:53", by:"walk"},
-    {n:"삿포로역", ll:[43.0686,141.3508], t:"14:20", d:"15:00 일정 미정", by:"jr"},
-    {n:"오도리공원 크리스마스 마켓", ll:[43.0602,141.3530], t:"18:00", d:"18:00 저녁식사 · 19:00 크리스마스 마켓, 일루미네이션", by:"walk", food:true},
+    {n:"삿포로역", ll:[43.0686,141.3508], t:"14:20", d:"", by:"jr"},
+    {n:"롯카테이 삿포로 본점 카페", ll:[43.0655,141.3487], t:"15:00", d:"(일정 미정 시간 추천) 2층 카페 한정 메뉴 · 마루세이 버터샌드 구입", by:"walk", food:true,
+     pick:"🧁 구글 평점 높은 삿포로 대표 과자점 본점"},
+    {n:"스프카레 GARAKU", ll:[43.0583,141.3557], t:"17:30", d:"저녁 스프카레 (오픈 17:30, 줄 생기기 전에 가기). 매운맛은 3–5단계부터", by:"walk", food:true,
+     pick:"🍛 타베로그 삿포로 스프카레 상위권 3대장 중 하나",
+     alt:[{n:"스아게+", ll:[43.0563,141.3515], d:"타베로그 카레 백명점, 늦게까지 영업"}]},
+    {n:"오도리공원 크리스마스 마켓", ll:[43.0602,141.3530], t:"19:00", d:"크리스마스 마켓 · 일루미네이션 (따뜻한 뱅쇼 한 잔)", by:"walk"},
     {n:"JR타워 T38 전망대", ll:[43.0683,141.3496], t:"20:00", d:"야경 · 티켓 미리 사기", by:"walk"},
     {n:"숙소 복귀", ll:HOTEL, t:"21:00", d:"", by:"walk"},
    ]},
  { date:"12/6", dow:"일", title:"체크아웃 · 귀국",
    stops:[
-    {n:"숙소", ll:HOTEL, t:"08:00", d:"아침식사 · 10:00 체크아웃", food:true},
+    {n:"숙소 출발", ll:HOTEL, t:"07:30", d:""},
+    {n:"니조시장 아침 카이센동", ll:[43.0580,141.3585], t:"07:45", d:"07시부터 영업. 오이소(大磯) 등에서 성게·연어알 카이센동 아침", by:"walk", food:true,
+     pick:"🦀 구글 인기 삿포로 아침 시장 (도보 15분)"},
+    {n:"숙소 복귀 · 체크아웃", ll:HOTEL, t:"09:30", d:"10:00 체크아웃", by:"walk"},
     {n:"삿포로역", ll:[43.0686,141.3508], t:"10:10", d:"JR 공항철도 탑승", by:"walk"},
-    {n:"신치토세 공항", ll:[42.7875,141.6812], t:"11:00", d:"국내선 점심 · 12:30 국제선 수속, 면세 · 14:20 탑승 (14:40 – 18:10)", by:"jr", via:JR_AIRPORT, food:true},
+    {n:"신치토세 공항", ll:[42.7875,141.6812], t:"11:00", d:"국내선 점심 · 12:30 국제선 수속, 면세 · 14:20 탑승 (14:40 – 18:10)", by:"jr", via:JR_AIRPORT, food:true,
+     pick:"🍽 추천: 마츠오 징기스칸 또는 하나마루 초밥(국내선 3층) · 키노토야 소프트아이스크림"},
     {n:"인천공항 제1터미널", ll:[37.4490,126.4510], t:"18:10", d:"입국 · 수하물 · 주차대행 차량 인수", by:"plane", via:[[38.8,131.0]]},
     {n:"동탄 도착", ll:[37.2000,127.0730], t:"19:40", d:"집으로 복귀", by:"car", via:[[37.3300,126.8400]]},
    ]},
@@ -251,6 +273,7 @@ function render(i){
   legs.forEach(l=>L.polyline(l.path,{color:css(MODE[l.mode].color),weight:3,opacity:.22,dashArray:MODE[l.mode].dash}).addTo(layer));
   pins=st.map((s,k)=>L.marker(s.ll,{icon:pinIcon(k+1,false),zIndexOffset:100})
     .bindPopup(`<b>${k+1}. ${s.n}</b><br>${s.t}${s.d?" · "+s.d:""}`).addTo(layer));
+  st.forEach(s=>(s.alt||[]).forEach(a=>L.marker(a.ll,{icon:L.divIcon({className:"",html:'<div class="altpin">🍴</div>',iconSize:[22,22],iconAnchor:[11,11]}),zIndexOffset:50}).bindPopup(`<b>🍴 ${a.n}</b><br>${a.d}`).addTo(layer)));
   map.fitBounds(L.latLngBounds(st.map(s=>s.ll)).pad(.12));
   // 통계
   const walk=legs.filter(l=>l.mode==="walk").reduce((a,l)=>a+l.km,0);
@@ -268,7 +291,7 @@ function render(i){
       d.innerHTML=`${m.icon} <b>${m.label}</b> ${l.km<1?Math.round(l.km*1000)+" m":l.km.toFixed(1)+" km"} · 약 ${mins}분`;list.appendChild(d);}
     const el=document.createElement("div"); el.className="stop"; el.tabIndex=0; el.id="stop"+k;
     el.innerHTML=`<div class="num">${k+1}</div><div><h3>${s.n}${s.food?' <span style="color:var(--accent);font-weight:500;font-size:12px">식사</span>':""}</h3>
-      <div class="meta">${s.t}</div>${s.d?`<p>${s.d}</p>`:""}</div>`;
+      <div class="meta">${s.t}</div>${s.d?`<p>${s.d}</p>`:""}${s.pick?`<p class="pick">${s.pick}</p>`:""}${(s.alt||[]).map(a=>`<p class="alt">🍴 후보: <b>${a.n}</b> — ${a.d}</p>`).join("")}</div>`;
     const go=()=>{map.flyTo(s.ll,Math.max(map.getZoom(),15),{duration:.8});pins[k].openPopup();};
     el.onclick=go; el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}};
     list.appendChild(el);
