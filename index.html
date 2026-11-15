@@ -12,7 +12,6 @@
 <meta property="og:image" content="https://kkhgold.github.io/sapporo-food-tour/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
@@ -134,8 +133,62 @@ h1{font:400 28px/1.15 var(--display);margin:0;letter-spacing:.01em;text-wrap:bal
   </aside>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
+// ---------- 구글 지도 어댑터: 기존 Leaflet 코드(L.*)를 Google Maps JS로 그대로 돌린다 ----------
+function __gl(){
+const g=google.maps, DARK=[{elementType:"geometry",stylers:[{color:"#1f2630"}]},{elementType:"labels.text.fill",stylers:[{color:"#9aa7b4"}]},{elementType:"labels.text.stroke",stylers:[{color:"#1f2630"}]},{featureType:"road",elementType:"geometry",stylers:[{color:"#323c48"}]},{featureType:"water",elementType:"geometry",stylers:[{color:"#14202c"}]},{featureType:"poi",elementType:"geometry",stylers:[{color:"#26303b"}]}];
+const ll=p=>Array.isArray(p)?{lat:p[0],lng:p[1]}:p;
+let info=null;
+class Bounds{constructor(s,n){this.s=s;this.n=n;}
+  static of(pts){let s=[90,180],n=[-90,-180];pts.forEach(p=>{s=[Math.min(s[0],p[0]),Math.min(s[1],p[1])];n=[Math.max(n[0],p[0]),Math.max(n[1],p[1])];});return new Bounds(s,n);}
+  pad(r){const dy=(this.n[0]-this.s[0])*r,dx=(this.n[1]-this.s[1])*r;return new Bounds([this.s[0]-dy,this.s[1]-dx],[this.n[0]+dy,this.n[1]+dx]);}
+  contains(p){return p[0]>=this.s[0]&&p[0]<=this.n[0]&&p[1]>=this.s[1]&&p[1]<=this.n[1];}
+  g(){return new g.LatLngBounds(ll(this.s),ll(this.n));}}
+class Layer{constructor(){this.items=new Set();this.m=null;}
+  addTo(m){this.m=m;this.items.forEach(i=>i.addTo(m));return this;}
+  add(i){this.items.add(i);if(this.m)i._show(this.m);}
+  clearLayers(){this.items.forEach(i=>i.remove());this.items.clear();}}
+function target(o,t){if(t instanceof Layer){t.add(o);return t.m;}o._show(t);return t;}
+class Html extends g.OverlayView{
+  constructor(p,o){super();this.p=p;this.icon=o.icon;this.z=o.zIndexOffset||0;this.el=document.createElement("div");
+    this.el.style.cssText="position:absolute;cursor:pointer";this.el.addEventListener("click",e=>{e.stopPropagation();if(this.pop)this.openPopup();});this._draw();}
+  _draw(){const i=this.icon;this.el.innerHTML=i.html;this.ax=i.iconAnchor[0];this.ay=i.iconAnchor[1];this.el.style.zIndex=this.z;}
+  onAdd(){this.getPanes().overlayMouseTarget.appendChild(this.el);}
+  draw(){const pr=this.getProjection();if(!pr)return;const pt=pr.fromLatLngToDivPixel(new g.LatLng(this.p[0],this.p[1]));
+    this.el.style.left=(pt.x-this.ax)+"px";this.el.style.top=(pt.y-this.ay)+"px";}
+  onRemove(){this.el.remove();}
+  _show(m){this.setMap(m.g);}
+  addTo(t){target(this,t);return this;}
+  remove(){this.setMap(null);}
+  setIcon(i){this.icon=i;this._draw();this.draw();return this;}
+  setLatLng(p){this.p=p;this.draw();return this;}
+  bindPopup(h){this.pop=h;return this;}
+  bindTooltip(h){this.el.title=h.replace(/<br>/g,"\n").replace(/<[^>]+>/g,"");return this;}
+  openPopup(){if(!this.getMap())return this;info=info||new g.InfoWindow();info.setContent(this.pop);
+    info.setOptions({pixelOffset:new g.Size(0,-this.ay)});info.setPosition(ll(this.p));info.open({map:this.getMap()});return this;}}
+class Line{constructor(pts,o){const dash=o.dashArray?String(o.dashArray).split(/[ ,]+/).map(Number):null,w=o.weight||3,op=o.opacity??1;
+    this.l=new g.Polyline({path:pts.map(ll),strokeColor:o.color,strokeWeight:w,clickable:false,
+      strokeOpacity:dash?0:op,icons:dash?[{icon:{path:"M 0,-1 0,1",strokeOpacity:op,strokeColor:o.color,strokeWeight:w,scale:Math.max(1,dash[0]*.6)},offset:"0",repeat:((dash[0]+dash[1])*1.4)+"px"}]:[]});}
+  _show(m){this.l.setMap(m.g);} addTo(t){target(this,t);return this;} remove(){this.l.setMap(null);}
+  setLatLngs(p){this.l.setPath(p.map(ll));return this;}}
+class Map{constructor(id){this.g=new g.Map(document.getElementById(id),{center:{lat:43.06,lng:141.35},zoom:13,gestureHandling:"greedy",
+      mapTypeControl:false,streetViewControl:false,fullscreenControl:false,clickableIcons:false,
+      styles:matchMedia("(prefers-color-scheme: dark)").matches?DARK:null});}
+  setView(p,z){this.g.setCenter(ll(p));this.g.setZoom(z);return this;}
+  getZoom(){return this.g.getZoom();}
+  getBounds(){const b=this.g.getBounds();if(!b)return new Bounds([-90,-180],[90,180]);const s=b.getSouthWest(),n=b.getNorthEast();return new Bounds([s.lat(),s.lng()],[n.lat(),n.lng()]);}
+  fitBounds(b){this.g.fitBounds(b.g(),0);return this;}
+  flyToBounds(b,o={}){this.g.fitBounds(b.g(),0);if(o.maxZoom)g.event.addListenerOnce(this.g,"idle",()=>{if(this.g.getZoom()>o.maxZoom)this.g.setZoom(o.maxZoom);});return this;}
+  flyTo(p,z){this.g.panTo(ll(p));if(z)this.g.setZoom(z);return this;}
+  panTo(p){this.g.panTo(ll(p));return this;}
+  invalidateSize(){return this;}}
+window.L={map:id=>new Map(id),tileLayer:()=>({addTo(){return this;}}),layerGroup:()=>new Layer(),
+  divIcon:o=>o,marker:(p,o)=>new Html(p,o||{}),polyline:(p,o)=>new Line(p,o||{}),latLngBounds:pts=>Bounds.of(pts)};
+window.__app();
+}
+</script>
+<script>
+window.__app=function(){
 // ---------- 데이터 (좌표는 근사값) ----------
 const MODE = {
   car:   {label:"자동차",icon:"🚗", color:"--walk",dash:null,  kmh:44},
@@ -246,10 +299,6 @@ const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 // ---------- 지도 ----------
 const dark = matchMedia("(prefers-color-scheme: dark)").matches;
 const map = L.map("map",{zoomControl:true}).setView([43.06,141.35],13);
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{
-  maxZoom:19, className: dark ? "dark-tiles" : "",
-  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
 const layer = L.layerGroup().addTo(map);
 
 let day=0, legs=[], pins=[], mover=null, anim=null, playing=false, legIdx=0, legT=0;
@@ -360,7 +409,7 @@ function stop(){ anim=null; playing=false; mover=null; legIdx=0; legT=0; const b
 // ---------- UI ----------
 const tabs=document.getElementById("tabs");
 DAYS.forEach((d,i)=>{const b=document.createElement("button");b.className="tab";b.setAttribute("role","tab");
-  b.innerHTML=`Day ${i+1}<small>${d.date} ${d.dow}</small>`;b.onclick=()=>{render(i);setTimeout(play,500);};tabs.appendChild(b);});
+  b.innerHTML=`Day ${i+1}<small>${d.date} ${d.dow}</small>`;b.onclick=()=>render(i);tabs.appendChild(b);});
 document.getElementById("play").onclick=play;
 document.getElementById("reset").onclick=()=>render(day);
 document.getElementById("share").onclick=async()=>{
@@ -373,7 +422,8 @@ document.getElementById("share").onclick=async()=>{
 };
 let initial=0; const h=location.hash.match(/^#day([1-4])$/); if(h) initial=+h[1]-1;
 render(initial);
-setTimeout(play,900);
+};
 </script>
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAA9EFrNWCj6KPlz1Rna_ab950MeYht1uo&callback=__gl&loading=async&language=ko&region=JP"></script>
 </body>
 </html>
